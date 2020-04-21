@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import _ from "utils/utils";
 import App from "../app";
 import { Checkbox } from "../components/Checkbox";
-import { Select } from "../utils";
+import { Select } from "../components/Select";
 
 import Set from "./Set";
 import CubeList from "./CubeList";
@@ -80,6 +80,7 @@ const CubeOptions = () => (
   <div>
     <Select link="cards" opts={_.seq(30, 5)} />
     {" "}cards
+    {" "}
     <Select link="packs" opts={_.seq(12, 1)} />
     {" "}packs
   </div>

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import App from "../app";
 import {BASICS, Zones, getZoneDisplayName} from "../cards";
-import {Select} from "../utils";
+import {Select} from "../components/Select";
 
 const DeckSettings = () => (
   (App.state.isGameFinished || App.state.didGameStart)
