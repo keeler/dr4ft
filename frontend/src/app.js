@@ -34,6 +34,7 @@ let App = {
     gamesubtype: "regular",
     sets: [],
     setsDraft: [],
+    setsDecadent: [],
     setsSealed: [],
     availableSets: {},
     list: "",
@@ -173,6 +174,9 @@ let App = {
     }
     if ( App.state.setsDraft.length === 0 && App.state.latestSet) {
       App.state.setsDraft = times(3, constant(App.state.latestSet.code));
+    }
+    if ( App.state.setsDecadent.length === 0 && App.state.latestSet) {
+      App.state.setsDecadent = times(3, constant(App.state.latestSet.code));
     }
     App.update();
   },

@@ -110,24 +110,27 @@ const events = {
     let options = {type, seats, title, isPrivate, modernOnly, totalChaos};
 
     switch (gamesubtype) {
-    case "regular": {
-      const {setsDraft, setsSealed} = App.state;
-      options.sets = gametype === "sealed" ? setsSealed : setsDraft;
-      break;
-    }
-    case "cube":
-      options.cube = parseCubeOptions();
-      break;
-    case "chaos":
-      options.chaosPacksNumber = /draft/.test(gametype) ? chaosDraftPacksNumber : chaosSealedPacksNumber;
-      break;
+      case "regular": {
+        const {setsDraft, setsSealed} = App.state;
+        options.sets = gametype === "sealed" ? setsSealed : setsDraft;
+        break;
+      }
+      case "cube":
+        options.cube = parseCubeOptions();
+        break;
+      case "chaos":
+        options.chaosPacksNumber = /draft/.test(gametype) ? chaosDraftPacksNumber : chaosSealedPacksNumber;
+        break;
+      case "decadent":
+        const {setsDecadent} = App.state;
+        options.sets = setsDecadent;  
     }
     App.send("create", options);
   },
-  changeSetsNumber(type, event) {
+  changeSetsNumber(type, isDecadent, event) {
     event.preventDefault();
     const packsNumber = event.currentTarget.value;
-    const sets = App.state[type];
+    let sets = App.state[type];
 
     if (sets.length < packsNumber) {
       const toAdd = packsNumber - sets.length;
@@ -135,6 +138,13 @@ const events = {
       sets.push(...times(toAdd, constant(lastSet)));
     } else if (sets.length > packsNumber) {
       sets.splice(packsNumber);
+    }
+
+    if (isDecadent) {
+      const firstSet = sets[0];
+      for (let i = 1; i < sets.length; i++) {
+        sets[i] = firstSet;
+      }
     }
 
     App.save(type, sets);

@@ -10,33 +10,35 @@ import Set from "./Set";
 import CubeList from "./CubeList";
 
 const GameOptions = () => {
-  const { setsDraft, setsSealed, gametype, gamesubtype } = App.state;
+  const { setsDraft, setsSealed, setsDecadent, gametype, gamesubtype } = App.state;
 
   switch (`${gamesubtype} ${gametype}`) {
-  case "regular draft":
-    return <Regular sets={setsDraft} type={"setsDraft"} />;
-  case "regular sealed":
-    return <Regular sets={setsSealed} type={"setsSealed"} />;
-  case "cube draft":
-    return <CubeDraft />;
-  case "cube sealed":
-    return <CubeSealed />;
-  case "chaos draft":
-    return <Chaos packsNumber={"chaosDraftPacksNumber"} />;
-  case "chaos sealed":
-    return <Chaos packsNumber={"chaosSealedPacksNumber"}/>;
-  default:
-    return <Regular sets={setsDraft} type={"setsDraft"} />;
+    case "regular draft":
+      return <Regular sets={setsDraft} type={"setsDraft"} />;
+    case "regular sealed":
+      return <Regular sets={setsSealed} type={"setsSealed"} />;
+    case "decadent draft":
+      return <Decadent sets={setsDecadent} type={"setsDecadent"} />;
+    case "cube draft":
+      return <CubeDraft />;
+    case "cube sealed":
+      return <CubeSealed />;
+    case "chaos draft":
+      return <Chaos packsNumber={"chaosDraftPacksNumber"} />;
+    case "chaos sealed":
+      return <Chaos packsNumber={"chaosSealedPacksNumber"}/>;
+    default:
+      return <Regular sets={setsDraft} type={"setsDraft"} />;
   }
 };
 
 const Regular = ({ sets, type }) => (
-  <Fragment >
+  <Fragment>
     <div>
       Number of packs:{" "}
       <Select
         value={sets.length}
-        onChange={App._emit("changeSetsNumber", type)}
+        onChange={App._emit("changeSetsNumber", type, false)}
         opts={_.seq(12, 1)} />
     </div>
     <div className="wrapper">
@@ -50,9 +52,29 @@ Regular.propTypes = {
   type: PropTypes.string
 };
 
+const Decadent = ({ sets, type }) => (
+  <Fragment>
+    <div>
+      Number of packs:{" "}
+      <Select
+        value={sets.length}
+        onChange={App._emit("changeSetsNumber", type, true)}
+        opts={_.seq(60, 36)} />
+    </div>
+    <div className="wrapper">
+      <Set type={type} selectedSet={sets[0]} index={0} key={0} isDecadent={true} />
+    </div>
+  </Fragment>
+);
+
+Decadent.propTypes = {
+  sets: PropTypes.array,
+  type: PropTypes.string
+};
+
 const Sets = ({ sets, type }) => (
   sets
-    .map((set, i) => <Set type={type} selectedSet={set} index={i} key={i} />)
+    .map((set, i) => <Set type={type} selectedSet={set} index={i} key={i} isDecadent={false}/>)
 );
 
 const CubeDraft = () => (
