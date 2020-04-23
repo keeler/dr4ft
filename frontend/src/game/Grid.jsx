@@ -3,8 +3,10 @@ import PropTypes from "prop-types";
 
 import _ from "utils/utils";
 import App from "../app";
-import {getZone, getZoneDisplayName, getCardSrc, getFallbackSrc} from "../cards";
+
+import {getCardSrc, getFallbackSrc} from "../cardimage";
 import {Spaced} from "../components/Spaced";
+import {ZONE_PACK, getZoneDisplayName} from "../zones";
 
 const Grid = ({zones}) => (
   <div>
@@ -17,14 +19,14 @@ Grid.propTypes = {
 };
 
 const zone = (zoneName, index) => {
-  const zone = getZone(zoneName);
+  const zone = App.getSortedZone(zoneName);
   const zoneDisplayName = getZoneDisplayName(zoneName);
   const values = _.values(zone);
   const cards = _.flat(values);
 
-  const zoneTitle = zoneDisplayName + (zoneName === "pack" ? " " + App.state.round : "");
+  const zoneTitle = zoneDisplayName + (zoneName === ZONE_PACK ? " " + App.state.round : "");
   const zoneHelper = App.state.didGameStart
-    ? zoneName === "pack"
+    ? zoneName === ZONE_PACK
       ? `Pick ${App.state.pickNumber} / ${App.state.packSize}`
       : cards.length
     : 0;
@@ -37,7 +39,7 @@ const zone = (zoneName, index) => {
       {cards.map((card, i) =>
         <Card key={i+zoneName+card.name+card.foil} card={card} zoneName={zoneName} />
       )}
-      {cards.length === 0 && zoneName === "pack" &&
+      {cards.length === 0 && zoneName === ZONE_PACK &&
         <h2 className='waiting'>Waiting for the next pack...</h2>
       }
     </div>
@@ -58,7 +60,7 @@ class Card extends Component {
   onMouseEnter() {
     if (this.props.card.isDoubleFaced) {
       this.setState({
-        isDoubleFaced: true,
+        mouseEntered: true,
         url: getCardSrc({
           ...this.props.card,
           isBack: this.props.card.flippedIsBack,
@@ -74,14 +76,14 @@ class Card extends Component {
       this.setState({
         url: getCardSrc(this.props.card),
         flipped: false,
-        isDoubleFaced: false
+        mouseEntered: false
       });
     }
   }
 
   render() {
     const {card, zoneName} = this.props;
-    const isAutopickable = zoneName === "pack" && card.isAutopick;
+    const isAutopickable = zoneName === ZONE_PACK && App.state.gameState.isAutopick(card.cardId);
 
     const className = `card
     ${isAutopickable ? "autopick-card " : ""}
@@ -95,10 +97,10 @@ class Card extends Component {
     return (
       <span className={className}
         title={title}
-        onClick={App._emit("click", zoneName, card.name)}
+        onClick={App._emit("click", zoneName, card)}
         onMouseEnter={this.onMouseEnter}
         onMouseLeave={this.onMouseLeave}>
-        <CardImage isDoubleFaced={this.state.isDoubleFaced} imgUrl={this.state.url} {...card}/>
+        <CardImage mouseEntered={this.state.mouseEntered} imgUrl={this.state.url} {...card}/>
       </span>
     );
   }
@@ -109,7 +111,7 @@ Card.propTypes = {
   zoneName: PropTypes.string.isRequired
 };
 
-const CardImage = ({ isDoubleFaced, url, flippedIsBack, flippedNumber, imgUrl, scryfallId = "", name, manaCost, type = "", rarity = "", power = "", toughness = "", text = "", loyalty= "", setCode = "", number = "" }) => (
+const CardImage = ({ mouseEntered, url, flippedIsBack, flippedNumber, imgUrl, scryfallId = "", name, manaCost, type = "", rarity = "", power = "", toughness = "", text = "", loyalty= "", setCode = "", number = "" }) => (
   App.state.cardSize === "text"
     ? <div style={{display: "block"}}>
       <p><strong>{name}</strong> {manaCost}</p>
@@ -120,7 +122,7 @@ const CardImage = ({ isDoubleFaced, url, flippedIsBack, flippedNumber, imgUrl, s
     </div>
     : <img title={name}
       onError= {getFallbackSrc({url: imgUrl, scryfallId, setCode, number})}
-      src={!isDoubleFaced
+      src={!mouseEntered
         ? getCardSrc({ scryfallId, setCode, url, number })
         : getCardSrc({ scryfallId, setCode, url, number: flippedNumber, isBack: flippedIsBack })
       }
@@ -143,7 +145,7 @@ CardImage.propTypes = {
   setCode: PropTypes.string,
   number: PropTypes.string,
   scryfallId: PropTypes.string,
-  isDoubleFaced: PropTypes.bool,
+  mouseEntered: PropTypes.bool,
   url: PropTypes.string,
   flippedIsBack: PropTypes.bool,
   flippedNumber: PropTypes.string,
